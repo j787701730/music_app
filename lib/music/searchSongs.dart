@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'util.dart';
+import 'package:music_app/utils/util.dart';
 import 'dart:convert';
 import '../rxdart/blocProvider.dart';
 
