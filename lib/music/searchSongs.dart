@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'util.dart';
 import 'dart:convert';
+import '../rxdart/blocProvider.dart';
 
 class SearchSongs extends StatefulWidget {
   final getSongUrl;
@@ -61,6 +62,7 @@ class _SearchSongsState extends State<SearchSongs> with AutomaticKeepAliveClient
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final bloc = BlocProvider.of(context);
     count = 0;
     return Scaffold(
       appBar: AppBar(
@@ -100,6 +102,14 @@ class _SearchSongsState extends State<SearchSongs> with AutomaticKeepAliveClient
         },
         child: ListView(
           children: <Widget>[
+            StreamBuilder<int>(
+                stream: bloc.stream,
+                initialData: bloc.value,
+                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                  return Text(
+                    '${snapshot.data}',
+                  );
+                }),
             songList.isEmpty
                 ? Placeholder(
                     fallbackHeight: 1,

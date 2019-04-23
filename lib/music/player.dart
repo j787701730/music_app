@@ -41,6 +41,7 @@ class _PlayerState extends State<Player> {
   get _positionText => _position?.toString()?.split('.')?.first ?? '00:00:00';
   double slider = 0.0;
   double maxSlider = 100.0;
+  int xx = 1;
 
   @override
   void initState() {
@@ -48,6 +49,16 @@ class _PlayerState extends State<Player> {
     super.initState();
     _audioPlayer = new AudioPlayer(mode: PlayerMode.MEDIA_PLAYER);
     AudioPlayer.logEnabled = false;
+  }
+
+  _initxx() {
+    final bloc = BlocProvider.of(context);
+    bloc.state.listen((str) {
+      print(str);
+//      if(str == 10){
+//        _pause();
+//      }
+    });
   }
 
   @override
@@ -79,6 +90,7 @@ class _PlayerState extends State<Player> {
           _position = Duration(seconds: 0);
         });
       }
+      _initxx();
     }
   }
 
@@ -159,13 +171,21 @@ class _PlayerState extends State<Player> {
         ? _position
         : null;
     final result = await _audioPlayer.play(widget.playUrl, isLocal: false, position: playPosition);
-    if (result == 1) setState(() => _playerState = PlayerState.playing);
+    if (result == 1) {
+      setState(() => _playerState = PlayerState.playing);
+      final bloc = BlocProvider.of(context);
+      bloc.changeState('playing');
+    }
     return result;
   }
 
   Future<int> _pause() async {
     final result = await _audioPlayer.pause();
-    if (result == 1) setState(() => _playerState = PlayerState.paused);
+    if (result == 1) {
+      setState(() => _playerState = PlayerState.paused);
+      final bloc = BlocProvider.of(context);
+      bloc.changeState('paused');
+    }
     return result;
   }
 
@@ -201,22 +221,22 @@ class _PlayerState extends State<Player> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            StreamBuilder<int>(
-                stream: bloc.stream,
-                initialData: bloc.value,
-                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-                  return Text(
-                    '${snapshot.data} / ',
-                  );
-                }),
-            StreamBuilder<String>(
-                stream: bloc.strVal,
-                initialData: bloc.str,
-                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                  return Text(
-                    '${snapshot.data}',
-                  );
-                }),
+//            StreamBuilder<int>(
+//                stream: bloc.stream,
+//                initialData: bloc.value,
+//                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+//                  return Text(
+//                    '${snapshot.data} / ',
+//                  );
+//                }),
+//            StreamBuilder<String>(
+//                stream: bloc.strVal,
+//                initialData: bloc.str,
+//                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+//                  return Text(
+//                    '${snapshot.data}',
+//                  );
+//                }),
             IconButton(
                 onPressed: () => _isPlaying ? _pause() : _play(),
                 iconSize: 20,

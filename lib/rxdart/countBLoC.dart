@@ -13,7 +13,7 @@ class CountBLoC {
     _subject.add(val);
   }
 
-  String _str = 'xxxx';
+  String _str = '0.0';
   var _subject2 = BehaviorSubject<String>();
 
   Stream<String> get strVal => _subject2.stream;
@@ -24,8 +24,20 @@ class CountBLoC {
     _subject2.add(val);
   }
 
+  String _stateVal;
+  var _subjectState = BehaviorSubject<String>();
+
+  Stream<String> get state => _subjectState.stream;
+
+  String get stateVal => _stateVal;
+
+  void changeState(val) {
+    _subjectState.add(val);
+  }
+
   void dispose() {
     _subject.close();
     _subject2.close();
+    _subjectState.close();
   }
 }
