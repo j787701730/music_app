@@ -9,12 +9,12 @@ import 'dart:convert';
 import 'player.dart';
 import 'playList.dart';
 
-class QQMusicHome extends StatefulWidget {
+class MusicHome extends StatefulWidget {
   @override
-  _QQMusicHomeState createState() => _QQMusicHomeState();
+  _MusicHomeState createState() => _MusicHomeState();
 }
 
-class _QQMusicHomeState extends State<QQMusicHome> with SingleTickerProviderStateMixin {
+class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMixin {
   TabController _tabController;
   DateTime _lastPressedAt;
   String playUrl;
@@ -26,7 +26,7 @@ class _QQMusicHomeState extends State<QQMusicHome> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = new TabController(vsync: this, length: categoryList.length);
+    _tabController = new TabController(vsync: this, initialIndex: 1, length: categoryList.length);
     getFavoriteSongs();
     getMyPlaySongsList();
     getCurrPlaySong();
@@ -40,11 +40,8 @@ class _QQMusicHomeState extends State<QQMusicHome> with SingleTickerProviderStat
 
   List result = [];
   List categoryList = [
-    {'categoryId': '0', 'name': '榜单'},
-    {'categoryId': '1', 'name': '随机'},
-    {'categoryId': '2', 'name': '收藏'},
-    {'categoryId': '3', 'name': '搜索'},
-    {'categoryId': '4', 'name': '列表'},
+    {'categoryId': '0', 'name': '我的'},
+    {'categoryId': '1', 'name': '发现'},
   ];
 
   getSongUrl(songData, {autoPlay: true}) {
@@ -180,48 +177,68 @@ class _QQMusicHomeState extends State<QQMusicHome> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: TabBar(
-            labelPadding: EdgeInsets.only(
-              left: 12,
-              right: 12,
-            ),
-            isScrollable: true,
-            tabs: categoryList.map<Widget>((item) {
-              return (Tab(child: Text(item['name'])));
-            }).toList(),
-            controller: _tabController,
+      appBar: AppBar(
+        title: TabBar(
+          labelPadding: EdgeInsets.only(
+            left: 12,
+            right: 12,
           ),
+          isScrollable: true,
+          tabs: categoryList.map<Widget>((item) {
+            return (Tab(child: Text(item['name'])));
+          }).toList(),
+          controller: _tabController,
+          indicatorColor: Colors.transparent,
+          labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          unselectedLabelStyle: TextStyle(fontSize: 14),
         ),
-        body: WillPopScope(
-            child: Container(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    height: MediaQuery.of(context).size.height - 40 - 56 - MediaQuery.of(context).padding.top,
-                    child: TabBarView(controller: _tabController, children: <Widget>[
-                      NewSongsTop(getSongUrl, changeFavourite, myFavouriteSongs),
-                      RandomSongs(getSongUrl, changeFavourite, myFavouriteSongs),
-                      MyFavourite(getSongUrl, changeFavourite, myFavouriteSongs),
-                      SearchSongs(getSongUrl, changeFavourite, myFavouriteSongs),
-                      PlayList(myPlaySongsList, getSongUrl, changePlayList, currPlaySong)
-                    ]),
-                  ),
-                  Container(
-                      height: 40,
-                      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 1))),
-                      child: Player(playUrl, autoPlayBool, currPlaySong, myPlaySongsList, getSongUrl, changePlayList))
-                ],
-              ),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.search), onPressed: (){
+            Navigator.push(context,
+              new MaterialPageRoute(builder: (BuildContext context) {
+                return new SearchSongs(getSongUrl, changeFavourite, myFavouriteSongs);
+              }));
+          })
+        ],
+      ),
+      body: WillPopScope(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  height: MediaQuery.of(context).size.height - 40 - 56 - MediaQuery.of(context).padding.top,
+                  child: TabBarView(controller: _tabController, children: <Widget>[
+                    MyFavourite(getSongUrl, changeFavourite, myFavouriteSongs),
+                    NewSongsTop(getSongUrl, changeFavourite, myFavouriteSongs),
+                  ]),
+                ),
+                Container(
+                    height: 40,
+                    decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 1))),
+                    child: Player(playUrl, autoPlayBool, currPlaySong, myPlaySongsList, getSongUrl, changePlayList))
+              ],
             ),
-            onWillPop: () async {
-              if (_lastPressedAt == null || DateTime.now().difference(_lastPressedAt) > Duration(seconds: 1)) {
-                //两次点击间隔超过1秒则重新计时
-                _lastPressedAt = DateTime.now();
-
-                return false;
-              }
-              return true;
-            }));
+          ),
+          onWillPop: () async {
+            if (_lastPressedAt == null || DateTime.now().difference(_lastPressedAt) > Duration(seconds: 1)) {
+              //两次点击间隔超过1秒则重新计时
+              _lastPressedAt = DateTime.now();
+              return false;
+            }
+            return true;
+          }),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            Container(
+              height: MediaQuery.of(context).padding.top,
+              color: Colors.blue,
+            ),
+            Text('待')
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'qqMusic/home.dart';
+import 'music/home.dart';
 
 class SplashPage extends StatefulWidget {
   SplashPage({Key key}) : super(key: key);
@@ -42,7 +42,7 @@ class _SplashPage extends State<SplashPage> {
     //如果页面还未跳转过则跳转页面
     if (!isStartHomePage) {
       //跳转主页 且销毁当前页面
-      Navigator.of(context).pushAndRemoveUntil(new MaterialPageRoute(builder: (context) => new QQMusicHome()), (Route<dynamic> rout) => false);
+      Navigator.of(context).pushAndRemoveUntil(new MaterialPageRoute(builder: (context) => new MusicHome()), (Route<dynamic> rout) => false);
       isStartHomePage = true;
     }
   }

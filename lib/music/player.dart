@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
-import 'playList.dart';
+import '../rxdart/blocProvider.dart';
 
 enum PlayerState { stopped, playing, paused }
 
@@ -13,7 +13,8 @@ class Player extends StatefulWidget {
   final getSongUrl;
   final changePlayList;
 
-  Player(this.playUrl, this.autoPlayBool, this.currPlaySong, this.myPlaySongsList, this.getSongUrl, this.changePlayList);
+  Player(
+      this.playUrl, this.autoPlayBool, this.currPlaySong, this.myPlaySongsList, this.getSongUrl, this.changePlayList);
 
   @override
   _PlayerState createState() => _PlayerState();
@@ -35,9 +36,9 @@ class _PlayerState extends State<Player> {
 
   get _isPaused => _playerState == PlayerState.paused;
 
-  get _durationText => _duration?.toString()?.split('.')?.first ?? '--:--:--';
+  get _durationText => _duration?.toString()?.split('.')?.first ?? '00:00:00';
 
-  get _positionText => _position?.toString()?.split('.')?.first ?? '--:--:--';
+  get _positionText => _position?.toString()?.split('.')?.first ?? '00:00:00';
   double slider = 0.0;
   double maxSlider = 100.0;
 
@@ -83,9 +84,12 @@ class _PlayerState extends State<Player> {
 
   setMaxSlider() {
     List arr = _durationText.split(':');
+
     setState(() {
       maxSlider = double.parse(arr[0]) * 24 * 60 + double.parse(arr[1]) * 60 + double.parse(arr.last);
     });
+    final bloc = BlocProvider.of(context);
+    bloc.send('$maxSlider');
   }
 
   setSlider() {
@@ -93,6 +97,8 @@ class _PlayerState extends State<Player> {
     setState(() {
       slider = double.parse(arr[0]) * 24 * 60 + double.parse(arr[1]) * 60 + double.parse(arr.last);
     });
+    final bloc = BlocProvider.of(context);
+    bloc.increment(slider.floor());
   }
 
   _playNext() {
@@ -187,83 +193,88 @@ class _PlayerState extends State<Player> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        IconButton(
-            onPressed: () => _isPlaying ? _pause() : _play(),
-            iconSize: 20,
-            icon: _isPlaying ? Icon(Icons.pause) : Icon(Icons.play_arrow),
-            color: Color(0xFF31C27C)),
-
-//        Offstage(
-//          offstage: _isPlaying,
-//          child: IconButton(
-//              onPressed: _isPlaying ? null : () => _play(),
-//              iconSize: 20,
-//              icon: new Icon(Icons.play_arrow),
-//              color: Colors.cyan),
-//        ),
-//        Offstage(
-//          offstage: !_isPlaying,
-//          child: IconButton(
-//              onPressed: _isPlaying ? () => _pause() : null, iconSize: 20, icon: Icon(Icons.pause), color: Colors.cyan),
-//        ),
-
+    final bloc = BlocProvider.of(context);
+    return Container(
+        height: 40,
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 1))),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            StreamBuilder<int>(
+                stream: bloc.stream,
+                initialData: bloc.value,
+                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                  return Text(
+                    '${snapshot.data} / ',
+                  );
+                }),
+            StreamBuilder<String>(
+                stream: bloc.strVal,
+                initialData: bloc.str,
+                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                  return Text(
+                    '${snapshot.data}',
+                  );
+                }),
+            IconButton(
+                onPressed: () => _isPlaying ? _pause() : _play(),
+                iconSize: 20,
+                icon: _isPlaying ? Icon(Icons.pause) : Icon(Icons.play_arrow),
+                color: Color(0xFF31C27C)),
 //                      IconButton(
 //                          onPressed: _isPlaying || _isPaused ? () => _stop() : null,
 //                          iconSize: 30,
 //                          icon: new Icon(Icons.stop),
 //                          color: Colors.cyan),
-        Expanded(
-          child: Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Row(
+            Expanded(
+              child: Container(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.only(left: 6),
-                        child: Text(
-                          '${widget.currPlaySong == null ? '' : widget.currPlaySong['songname']}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12),
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.only(left: 6),
+                            child: Text(
+                              '${widget.currPlaySong == null ? '' : widget.currPlaySong['songname']}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
                         ),
-                      ),
+                        Container(
+                          width: 100,
+                          child: Text(
+                            _position != null
+                                ? '${_positionText.substring(2) ?? ''} / ${_durationText.substring(2) ?? ''}'
+                                : _duration != null ? _durationText : '',
+                            style: TextStyle(fontSize: 12),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      ],
                     ),
                     Container(
-                      width: 80,
-                      child: Text(
-                        _position != null
-                            ? '${_positionText.substring(2) ?? ''} / ${_durationText.substring(2) ?? ''}'
-                            : _duration != null ? _durationText : '',
-                        style: TextStyle(fontSize: 12),
-                        textAlign: TextAlign.center,
+                      height: 20,
+                      child: Slider(
+                        value: slider,
+                        max: maxSlider,
+                        min: 0.0,
+                        activeColor: Color(0xFF31C27C),
+                        onChanged: (double val) {
+                          _seek(val);
+                        },
                       ),
-                    )
+                    ),
                   ],
                 ),
-                Container(
-                  height: 20,
-                  child: Slider(
-                    value: slider,
-                    max: maxSlider,
-                    min: 0.0,
-                    activeColor: Color(0xFF31C27C),
-                    onChanged: (double val) {
-                      _seek(val);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )
-      ],
-    );
+              ),
+            )
+          ],
+        ));
   }
 }
