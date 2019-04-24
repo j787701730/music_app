@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/utils/util.dart';
-import 'newSongsTop.dart';
-import 'randomSongs.dart';
+import 'discover.dart';
 import 'searchSongs.dart';
 import 'myFavourite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,31 +44,28 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
   ];
 
   getSongUrl(songData, {autoPlay: true}) {
-    String url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg?format=json205361747&platform=yqq'
-        '&cid=205361747&songmid=${songData['songmid']}&filename=C400${songData['songmid']}.m4a&guid=126548448';
-    ajax(url, (data) {
-      if (!mounted) return;
-      Map obj = jsonDecode(data);
-      String vkey = obj['data']['items'][0]['vkey'];
-      setState(() {
-        playUrl = 'http://ws.stream.qqmusic.qq.com/C400${songData['songmid']}.m4a?fromtag=0&guid=126548448&vkey=$vkey';
-        currPlaySong = songData;
-        autoPlayBool = autoPlay;
-      });
+    setState(() {
+      playUrl = songData[0]['url'];
+      currPlaySong = songData[0];
+      autoPlayBool = autoPlay;
+    });
+    if (songData.length == 1) {
       if (myPlaySongsList.length == 0) {
-        changePlayList(songData, true);
+        changePlayList(songData[0], true);
       } else {
         for (var o in myPlaySongsList) {
-          if (o['songmid'] == songData['songmid']) {
+          if (o['id'] == songData[0]['id']) {
             break;
           }
           if (myPlaySongsList.indexOf(o) == myPlaySongsList.length - 1) {
-            changePlayList(songData, true);
+            changePlayList(songData[0], true);
           }
         }
       }
-      saveCurrPlaySong(songData);
-    });
+    } else {
+      changePlayList(songData, true, replace: true);
+    }
+    saveCurrPlaySong(songData[0]);
   }
 
   getFavoriteSongs() async {
@@ -87,6 +83,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
   }
 
   // 添加或删除 我的收藏
+  /// list 数据  flag true=>添加 false=>删除,
   changeFavourite(Map list, bool flag) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String myFavouriteSongsStr = preferences.getString('myFavouriteSongs');
@@ -101,7 +98,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
         arr.insert(0, list);
       } else {
         for (var o in arr) {
-          if (o['songmid'] == list['songmid']) {
+          if (o['id'] == list['id']) {
             arr.remove(o);
             break;
           }
@@ -128,23 +125,27 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
     }
   }
 
-  changePlayList(Map list, bool flag) async {
+  changePlayList(list, bool flag, {replace = false}) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String myPlaySongsListStr = preferences.getString('myPlaySongsList');
     List arr = [];
-    if (myPlaySongsListStr == null) {
-      if (flag) {
-        arr.add(list);
-      }
+    if (replace) {
+      arr = list;
     } else {
-      arr = jsonDecode(myPlaySongsListStr);
-      if (flag) {
-        arr.insert(0, list);
+      if (myPlaySongsListStr == null) {
+        if (flag) {
+          arr.add(list);
+        }
       } else {
-        for (var o in arr) {
-          if (o['songmid'] == list['songmid']) {
-            arr.remove(o);
-            break;
+        arr = jsonDecode(myPlaySongsListStr);
+        if (flag) {
+          arr.insert(0, list);
+        } else {
+          for (var o in arr) {
+            if (o['id'] == list['id']) {
+              arr.remove(o);
+              break;
+            }
           }
         }
       }
@@ -163,7 +164,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
     } else {
       setState(() {
         currPlaySong = jsonDecode(currPlaySongStr);
-        getSongUrl(currPlaySong, autoPlay: false);
+        getSongUrl([currPlaySong], autoPlay: false);
       });
     }
   }
@@ -193,12 +194,13 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
           unselectedLabelStyle: TextStyle(fontSize: 14),
         ),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.search), onPressed: (){
-            Navigator.push(context,
-              new MaterialPageRoute(builder: (BuildContext context) {
-                return new SearchSongs(getSongUrl, changeFavourite, myFavouriteSongs);
-              }));
-          })
+          IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                  return new SearchSongs(getSongUrl, changeFavourite, myFavouriteSongs);
+                }));
+              })
         ],
       ),
       body: WillPopScope(
@@ -209,7 +211,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
                   height: MediaQuery.of(context).size.height - 40 - 56 - MediaQuery.of(context).padding.top,
                   child: TabBarView(controller: _tabController, children: <Widget>[
                     MyFavourite(getSongUrl, changeFavourite, myFavouriteSongs),
-                    NewSongsTop(getSongUrl, changeFavourite, myFavouriteSongs),
+                    Discover(getSongUrl, changeFavourite, myFavouriteSongs),
                   ]),
                 ),
                 Container(

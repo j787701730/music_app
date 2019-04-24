@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:music_app/utils/util.dart';
 import 'dart:convert';
 import '../rxdart/blocProvider.dart';
+import 'searchSongPage.dart';
 
 class SearchSongs extends StatefulWidget {
   final getSongUrl;
@@ -14,41 +15,76 @@ class SearchSongs extends StatefulWidget {
   _SearchSongsState createState() => _SearchSongsState();
 }
 
-class _SearchSongsState extends State<SearchSongs> with AutomaticKeepAliveClientMixin {
+class _SearchSongsState extends State<SearchSongs> with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  List type = [
+//  音乐搜索:type=song
+//  歌手搜索:type=singer
+//  专辑搜索:type=album
+//  歌单搜索:type=list
+//  视频搜索:type=video
+//  电台搜索:type=radio
+//  用户搜索:type=user
+//  歌词搜索:type=lrc
+    {'type': 'song', 'name': '歌曲'},
+    {'type': 'singer', 'name': '歌手'},
+    {'type': 'album', 'name': '专辑'},
+    {'type': 'list', 'name': '歌单'},
+    {'type': 'video', 'name': '视频'},
+    {'type': 'radio', 'name': '电台'},
+    {'type': 'user', 'name': '用户'},
+    {'type': 'lrc', 'name': '歌词'},
+  ];
+
+  List songTypeData = [];
+  int tabIndex = 0;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _tabController = new TabController(vsync: this, length: type.length);
+    _tabController.addListener(() {
+      if (_tabController.index.toDouble() == _tabController.animation.value) {
+        setState(() {
+          tabIndex = _tabController.index;
+          _getList();
+        });
+      }
+    });
   }
 
   @override
   bool get wantKeepAlive => true;
   List songList = [];
-  String searchWord = '';
+  String searchWord = '逆流成河';
   int count = 0;
+  TabController _tabController;
+
+//  String type = 'song';
   FocusNode _contentFocusNode = FocusNode();
 
   @override
   void dispose() {
     _contentFocusNode.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   _getList() {
     _contentFocusNode.unfocus();
     if (searchWord.trim() == '') {
-      setState(() {
-        songList = [];
-      });
       return;
     }
-    ajax('https://c.y.qq.com/soso/fcgi-bin/client_search_cp?aggr=1&cr=1&flag_qc=0&p=1&n=50&w=$searchWord', (data) {
+    ajax('/search?key=579621905&s=$searchWord&type=${type[tabIndex]['type']}&limit=50&offset=0', (data) {
       if (!mounted) return;
-      Map obj = jsonDecode(data.substring(9, data.length - 1));
-      if (obj['code'] == 0) {
-        setState(() {
-          songList = obj['data']['song']['list'];
-        });
+      if (data['code'] == 200) {
+        switch (tabIndex) {
+          case 0:
+            setState(() {
+              songTypeData = data['data'];
+            });
+            break;
+        }
       }
     });
   }
@@ -95,105 +131,31 @@ class _SearchSongsState extends State<SearchSongs> with AutomaticKeepAliveClient
             ],
           ),
         ),
+        bottom: TabBar(
+          isScrollable: true,
+          tabs: type.map<Widget>((item) {
+            return Tab(
+              text: item['name'],
+            );
+          }).toList(),
+          controller: _tabController,
+        ),
       ),
       body: GestureDetector(
         onTap: () {
           _contentFocusNode.unfocus();
         },
-        child: ListView(
+        child: TabBarView(
+          controller: _tabController,
           children: <Widget>[
-            StreamBuilder<int>(
-                stream: bloc.stream,
-                initialData: bloc.value,
-                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-                  return Text(
-                    '${snapshot.data}',
-                  );
-                }),
-            songList.isEmpty
-                ? Placeholder(
-                    fallbackHeight: 1,
-                    fallbackWidth: 1,
-                    color: Colors.transparent,
-                  )
-                : Column(
-                    children: songList.map<Widget>((item) {
-                      count += 1;
-                      bool flag = false;
-                      if (item != null) {
-                        for (var o in widget.myFavouriteSongs) {
-                          if (item['songmid'] == o['songmid']) {
-                            flag = true;
-                            break;
-                          }
-                        }
-                      }
-                      return Container(
-                        padding: EdgeInsets.only(bottom: 5, top: 5),
-                        decoration:
-                            BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xffeeeeee), width: 1))),
-                        child: Row(
-                          children: <Widget>[
-                            Container(
-                              width: 40,
-                              child: Center(
-                                child: Text('$count'),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.only(left: 10, right: 10),
-                                child: InkWell(
-                                  onTap: () {
-                                    widget.getSongUrl({
-                                      'songmid': '${item['songmid']}',
-                                      'songname': '${item['songname']}',
-                                      'singer': '${item['singer'][0]['name']}'
-                                    });
-                                  },
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      Container(
-                                        child: Text(
-                                          '${item['songname']}',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      Container(
-                                        child: Text(
-                                          item['singer'][0]['name'],
-                                          style: TextStyle(color: Color(0xff777777)),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 30,
-                              child: InkWell(
-                                onTap: () {
-                                  widget.changeFavourite({
-                                    'songmid': '${item['songmid']}',
-                                    'songname': '${item['songname']}',
-                                    'singer': '${item['singer'][0]['name']}',
-                                  }, !flag);
-                                },
-                                child: Icon(
-                                  flag ? Icons.favorite : Icons.favorite_border,
-                                  color: Color(0xFF31C27C),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  )
+            SearchSongPage({'data': songTypeData}, widget.getSongUrl),
+            new Center(child: new Text('船')),
+            new Center(child: new Text('巴士')),
+            new Center(child: new Text('自行车')),
+            new Center(child: new Text('船')),
+            new Center(child: new Text('巴士')),
+            new Center(child: new Text('自行车')),
+            new Center(child: new Text('船')),
           ],
         ),
       ),

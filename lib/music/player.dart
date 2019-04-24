@@ -63,6 +63,7 @@ class _PlayerState extends State<Player> {
 
   @override
   void dispose() {
+    print('dispose');
     _audioPlayer.stop();
     _durationSubscription?.cancel();
     _positionSubscription?.cancel();
@@ -116,11 +117,11 @@ class _PlayerState extends State<Player> {
   _playNext() {
     if (widget.myPlaySongsList.length > 0) {
       for (var o in widget.myPlaySongsList) {
-        if (o['songmid'] == widget.currPlaySong['songmid']) {
+        if (o['id'] == widget.currPlaySong['id']) {
           if (widget.myPlaySongsList.indexOf(o) == widget.myPlaySongsList.length - 1) {
-            widget.getSongUrl(widget.myPlaySongsList[0]);
+            widget.getSongUrl([widget.myPlaySongsList[0]]);
           } else {
-            widget.getSongUrl(widget.myPlaySongsList[widget.myPlaySongsList.indexOf(o) + 1]);
+            widget.getSongUrl([widget.myPlaySongsList[widget.myPlaySongsList.indexOf(o) + 1]]);
           }
         }
       }
@@ -211,6 +212,8 @@ class _PlayerState extends State<Player> {
     });
   }
 
+  CurvedAnimation curved;
+
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of(context);
@@ -259,7 +262,7 @@ class _PlayerState extends State<Player> {
                           child: Container(
                             padding: EdgeInsets.only(left: 6),
                             child: Text(
-                              '${widget.currPlaySong == null ? '' : widget.currPlaySong['songname']}',
+                              '${widget.currPlaySong == null ? '' : widget.currPlaySong['name']}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(fontSize: 12),
@@ -281,8 +284,8 @@ class _PlayerState extends State<Player> {
                     Container(
                       height: 20,
                       child: Slider(
-                        value: slider,
-                        max: maxSlider,
+                        value: slider >= 0 ? slider : 0.0,
+                        max: maxSlider >= 0 ? maxSlider : 100.0,
                         min: 0.0,
                         activeColor: Color(0xFF31C27C),
                         onChanged: (double val) {
@@ -293,7 +296,15 @@ class _PlayerState extends State<Player> {
                   ],
                 ),
               ),
-            )
+            ),
+//            Container(
+//              width: 40,
+//              child: Image.network(
+//                widget.currPlaySong['pic'],
+//                width: 30,
+//                height: 30,
+//              ),
+//            )
           ],
         ));
   }

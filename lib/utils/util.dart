@@ -1,10 +1,13 @@
 import 'package:dio/dio.dart';
 
+const baseUrl = 'https://api.itooi.cn/music/netease';
+
 ajax(String url, sucFun) async {
+  print("$baseUrl$url");
   try {
     Response response;
     response = await Dio().get(
-      "$url",
+      "$baseUrl$url",
     );
     sucFun(response.data);
   } catch (e) {
