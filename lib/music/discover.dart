@@ -244,7 +244,10 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                   ),
                 ),
           highQualitySongList.isEmpty
-              ? PageLoading()
+              ? Placeholder(
+                  fallbackHeight: 1,
+                  color: Colors.transparent,
+                )
               : Container(
                   padding: EdgeInsets.only(left: 10),
                   child: Wrap(
@@ -321,7 +324,10 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                   ),
                 ),
           topMvList.isEmpty
-              ? PageLoading()
+              ? Placeholder(
+                  fallbackHeight: 1,
+                  color: Colors.transparent,
+                )
               : Container(
                   padding: EdgeInsets.only(left: 10),
                   child: Wrap(
