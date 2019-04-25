@@ -150,7 +150,7 @@ class _PlayerState extends State<Player> {
     _playerErrorSubscription = _audioPlayer.onPlayerError.listen((msg) {
       setState(() {
         _playerState = PlayerState.stopped;
-        _duration = new Duration(seconds: 0);
+        _duration = new Duration(seconds: 100);
         _position = new Duration(seconds: 0);
       });
       _playNext();
