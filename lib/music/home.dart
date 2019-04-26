@@ -208,14 +208,14 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
             child: Column(
               children: <Widget>[
                 Container(
-                  height: MediaQuery.of(context).size.height - 40 - 56 - MediaQuery.of(context).padding.top,
+                  height: MediaQuery.of(context).size.height - 400 - 56 - MediaQuery.of(context).padding.top,
                   child: TabBarView(controller: _tabController, children: <Widget>[
                     MyFavourite(getSongUrl, changeFavourite, myFavouriteSongs),
                     Discover(getSongUrl, changeFavourite, myFavouriteSongs),
                   ]),
                 ),
                 Container(
-                    height: 40,
+                    height: 400,
                     decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 1))),
                     child: Player(playUrl, autoPlayBool, currPlaySong, myPlaySongsList, getSongUrl, changePlayList))
               ],
