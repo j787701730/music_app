@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:music_app/utils/util.dart';
+
+//import 'package:music_app/utils/util.dart';
 import 'discover.dart';
 import 'searchSongs.dart';
 import 'myFavourite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'player.dart';
-import 'playList.dart';
+import '../rxdart/blocProvider.dart';
 
 class MusicHome extends StatefulWidget {
   @override
@@ -49,6 +50,10 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
       currPlaySong = songData[0];
       autoPlayBool = autoPlay;
     });
+
+    final bloc = BlocProvider.of(context);
+    bloc.changeBlocCurrPlaySong(jsonEncode(songData[0]));
+
     if (songData.length == 1) {
       if (myPlaySongsList.length == 0) {
         changePlayList(songData[0], true);
@@ -114,13 +119,16 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
   getMyPlaySongsList() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String myPlaySongsListStr = preferences.getString('myPlaySongsList');
+    final bloc = BlocProvider.of(context);
     if (myPlaySongsListStr == null) {
       setState(() {
         myPlaySongsList = [];
+        bloc.changeBlocCurrPlaySong(jsonEncode([]));
       });
     } else {
       setState(() {
         myPlaySongsList = jsonDecode(myPlaySongsListStr);
+        bloc.changeBlocMyPlaySongsList(myPlaySongsListStr);
       });
     }
   }
@@ -129,6 +137,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String myPlaySongsListStr = preferences.getString('myPlaySongsList');
     List arr = [];
+
     if (replace) {
       arr = list;
     } else {
@@ -152,8 +161,10 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
     }
     setState(() {
       myPlaySongsList = arr;
+      preferences.setString('myPlaySongsList', jsonEncode(arr));
     });
-    preferences.setString('myPlaySongsList', jsonEncode(arr));
+    final bloc = BlocProvider.of(context);
+    bloc.changeBlocMyPlaySongsList(jsonEncode(arr));
   }
 
   // 获取当前播放的歌曲
@@ -179,6 +190,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: TabBar(
           labelPadding: EdgeInsets.only(
             left: 12,
@@ -190,8 +202,8 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
           }).toList(),
           controller: _tabController,
           indicatorColor: Colors.transparent,
-          labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          unselectedLabelStyle: TextStyle(fontSize: 14),
+//          labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+//          unselectedLabelStyle: TextStyle(fontSize: 14),
         ),
         actions: <Widget>[
           IconButton(
@@ -200,7 +212,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
                 Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
                   return new SearchSongs(getSongUrl, changeFavourite, myFavouriteSongs);
                 }));
-              })
+              }),
         ],
       ),
       body: WillPopScope(
@@ -208,14 +220,14 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
             child: Column(
               children: <Widget>[
                 Container(
-                  height: MediaQuery.of(context).size.height - 400 - 56 - MediaQuery.of(context).padding.top,
+                  height: MediaQuery.of(context).size.height - 40 - 56 - MediaQuery.of(context).padding.top,
                   child: TabBarView(controller: _tabController, children: <Widget>[
                     MyFavourite(getSongUrl, changeFavourite, myFavouriteSongs),
                     Discover(getSongUrl, changeFavourite, myFavouriteSongs),
                   ]),
                 ),
                 Container(
-                    height: 400,
+                    height: 40,
                     decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 1))),
                     child: Player(playUrl, autoPlayBool, currPlaySong, myPlaySongsList, getSongUrl, changePlayList))
               ],

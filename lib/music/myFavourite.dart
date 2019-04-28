@@ -24,7 +24,7 @@ class _MyFavouriteState extends State<MyFavourite> {
   @override
   Widget build(BuildContext context) {
     count = 0;
-
+    print(widget.myFavouriteSongs);
     return Scaffold(
       body: widget.myFavouriteSongs == null
           ? null
@@ -32,12 +32,8 @@ class _MyFavouriteState extends State<MyFavourite> {
               children: widget.myFavouriteSongs.map<Widget>((item) {
                 count += 1;
                 return Container(
-                  padding: EdgeInsets.only(bottom: 5,top: 5),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Color(0xffeeeeee),width: 1)
-                    )
-                  ),
+                  padding: EdgeInsets.only(bottom: 5, top: 5),
+                  decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xffeeeeee), width: 1))),
                   child: Row(
                     children: <Widget>[
                       Container(
@@ -51,9 +47,7 @@ class _MyFavouriteState extends State<MyFavourite> {
                           padding: EdgeInsets.only(left: 10, right: 10),
                           child: InkWell(
                             onTap: () {
-                              widget.getSongUrl({'songmid': '${item['songmid']}',
-                                'songname': '${item['songname']}',
-                                'singer': '${item['name']}'});
+                              widget.getSongUrl([item]);
                             },
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +55,7 @@ class _MyFavouriteState extends State<MyFavourite> {
                               children: <Widget>[
                                 Container(
                                   child: Text(
-                                    '${item['songname']}',
+                                    '${item['name']}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

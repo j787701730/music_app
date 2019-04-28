@@ -45,7 +45,7 @@ class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin 
       SliverAppBar(
         centerTitle: true,
         //标题居中
-        expandedHeight: 300.0,
+        expandedHeight: 200.0,
         //展开高度200
         floating: false,
         //不随着滑动隐藏标题
@@ -91,8 +91,8 @@ class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin 
                           children: <Widget>[
                             Container(
                               margin: EdgeInsets.only(left: 20),
-                              width: 150,
-                              height: 150,
+                              width: 100,
+                              height: 100,
                               child: Stack(
                                 children: <Widget>[
                                   Image.network(songList['songListPic']),
@@ -145,7 +145,7 @@ class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin 
                           ],
                         ),
                       ),
-                      top: MediaQuery.of(context).padding.top + 56 + 25,
+                      top: MediaQuery.of(context).padding.top + 56 + 10,
                     ),
                   ],
                 )
@@ -161,7 +161,7 @@ class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    double oneIn3 = (MediaQuery.of(context).size.width - 10) / 3;
+//    double oneIn3 = (MediaQuery.of(context).size.width - 10) / 3;
     return Scaffold(
       body: NestedScrollView(
           headerSliverBuilder: _sliverBuilder,

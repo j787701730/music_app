@@ -1,27 +1,10 @@
 import 'package:flutter/material.dart';
-import '../rxdart/blocProvider.dart';
 import 'package:audioplayer/audioplayer.dart';
 import 'dart:async';
+import '../rxdart/blocProvider.dart';
+import 'playList.dart';
 
-import 'package:audio_service/audio_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-
-MediaControl playControl = MediaControl(
-  androidIcon: 'drawable/ic_action_play_arrow',
-  label: 'Play',
-  action: MediaAction.play,
-);
-MediaControl pauseControl = MediaControl(
-  androidIcon: 'drawable/ic_action_pause',
-  label: 'Pause',
-  action: MediaAction.pause,
-);
-MediaControl stopControl = MediaControl(
-  androidIcon: 'drawable/ic_action_stop',
-  label: 'Stop',
-  action: MediaAction.stop,
-);
+enum PlayerState { stopped, playing, paused }
 
 class Player extends StatefulWidget {
   final playUrl;
@@ -38,71 +21,96 @@ class Player extends StatefulWidget {
   _PlayerState createState() => _PlayerState();
 }
 
-class _PlayerState extends State<Player> with WidgetsBindingObserver {
-  PlaybackState _state;
-  StreamSubscription _playbackStateSubscription;
+class _PlayerState extends State<Player> {
+  Duration duration;
+  Duration position;
+
+  AudioPlayer audioPlayer;
+
+  String localFilePath;
+
+  PlayerState playerState = PlayerState.stopped;
+
+  get isPlaying => playerState == PlayerState.playing;
+
+  get isPaused => playerState == PlayerState.paused;
+
+  get durationText => duration != null ? duration.toString().split('.').first : '00:00:00';
+
+  get positionText => position != null ? position.toString().split('.').first : '00:00:00';
+
+  bool isMuted = false;
+
+  StreamSubscription _positionSubscription;
+  StreamSubscription _audioPlayerStateSubscription;
+
+  double slider = 0.0;
+  double maxSlider = 100.0;
+  int xx = 1;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    connect();
+    audioPlayer = new AudioPlayer();
+  }
+
+  _initxx() {
+    final bloc = BlocProvider.of(context);
+    bloc.state.listen((str) {
+      print(str);
+//      if(str == 10){
+//        _pause();
+//      }
+    });
   }
 
   @override
   void dispose() {
-    disconnect();
-    WidgetsBinding.instance.removeObserver(this);
+    print('dispose');
+    _positionSubscription.cancel();
+    _audioPlayerStateSubscription.cancel();
+    audioPlayer.stop();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.resumed:
-        connect();
-        break;
-      case AppLifecycleState.paused:
-        disconnect();
-        break;
-      default:
-        break;
-    }
   }
 
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print('start');
     if (oldWidget.playUrl != widget.playUrl) {
       if (!mounted) return;
-//      _stop();
-      start();
+      print(widget.playUrl);
+      stop();
       if (widget.autoPlayBool) {
-      } else {}
-    }
-  }
-
-  void connect() async {
-    await AudioService.connect();
-    if (_playbackStateSubscription == null) {
-      _playbackStateSubscription = AudioService.playbackStateStream.listen((PlaybackState playbackState) {
-        print('playbackState');
-        print(playbackState);
         setState(() {
-          _state = playbackState;
+          _initAudioPlayer();
+          play();
         });
-      });
+      } else {
+        setState(() {
+          _initAudioPlayer();
+        });
+      }
+      _initxx();
     }
   }
 
-  void disconnect() {
-    if (_playbackStateSubscription != null) {
-      _playbackStateSubscription.cancel();
-      _playbackStateSubscription = null;
-    }
-    AudioService.disconnect();
+  setMaxSlider() {
+    List arr = durationText.split(':');
+    setState(() {
+      maxSlider = double.parse(arr[0]) * 24 * 60 + double.parse(arr[1]) * 60 + double.parse(arr.last);
+    });
+//    final bloc = BlocProvider.of(context);
+//    bloc.send('$maxSlider');
+  }
+
+  setSlider() {
+    List arr = positionText.split(':');
+    setState(() {
+      slider = double.parse(arr[0]) * 24 * 60 + double.parse(arr[1]) * 60 + double.parse(arr.last);
+    });
+//    final bloc = BlocProvider.of(context);
+//    bloc.increment(slider.floor());
   }
 
   _playNext() {
@@ -113,162 +121,212 @@ class _PlayerState extends State<Player> with WidgetsBindingObserver {
             widget.getSongUrl([widget.myPlaySongsList[0]]);
           } else {
             widget.getSongUrl([widget.myPlaySongsList[widget.myPlaySongsList.indexOf(o) + 1]]);
+            break;
           }
         }
       }
     }
+  }
+
+  void _initAudioPlayer() {
+    _positionSubscription = audioPlayer.onAudioPositionChanged.listen((p) => setState(() {
+          position = p;
+          setSlider();
+        }));
+    _audioPlayerStateSubscription = audioPlayer.onPlayerStateChanged.listen((s) {
+      if (s == AudioPlayerState.PLAYING) {
+        setState(() {
+          duration = audioPlayer.duration;
+          setMaxSlider();
+        });
+      } else if (s == AudioPlayerState.STOPPED) {
+        onComplete();
+        setState(() {
+          position = duration;
+        });
+        print('AudioPlayerState.STOPPED');
+      } else if (s == AudioPlayerState.COMPLETED) {
+        onComplete();
+        print('COMPLETED');
+        _playNext();
+      }
+    }, onError: (msg) {
+      setState(() {
+        playerState = PlayerState.stopped;
+        duration = new Duration(seconds: 0);
+        position = new Duration(seconds: 0);
+      });
+      _playNext();
+    });
+  }
+
+  Future play() async {
+    await audioPlayer.play(widget.playUrl);
+    setState(() {
+      playerState = PlayerState.playing;
+    });
+  }
+
+  Future pause() async {
+    await audioPlayer.pause();
+    setState(() => playerState = PlayerState.paused);
+  }
+
+  Future stop() async {
+    await audioPlayer.stop();
+    setState(() {
+      playerState = PlayerState.stopped;
+      position = new Duration();
+    });
+  }
+
+  Future mute(bool muted) async {
+    await audioPlayer.mute(muted);
+    setState(() {
+      isMuted = muted;
+    });
+  }
+
+  void onComplete() {
+    setState(() => playerState = PlayerState.stopped);
+  }
+
+  _seek(val) {
+    this.setState(() {
+      slider = val;
+      audioPlayer.seek(val);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final bloc = BlocProvider.of(context);
+//    final bloc = BlocProvider.of(context);
     return Container(
-      height: 400,
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 1))),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: _state?.basicState == BasicPlaybackState.playing
-            ? [pauseButton(), stopButton()]
-            : _state?.basicState == BasicPlaybackState.paused ? [playButton(), stopButton()] : [audioPlayerButton()],
-      ),
-    );
-  }
-
-  start() {
-    AudioService.start(
-      backgroundTask: _backgroundAudioPlayerTask,
-      resumeOnClick: true,
-      androidNotificationChannelName: 'Audio Service Demo',
-      notificationColor: 0xFF2196f3,
-      androidNotificationIcon: 'mipmap/ic_launcher',
-    );
-  }
-
-  RaisedButton audioPlayerButton() => startButton('AudioPlayer');
-
-  RaisedButton startButton(String label) => RaisedButton(
-        child: Text(label),
-        onPressed: start,
-      );
-
-  IconButton playButton() => IconButton(
-        icon: Icon(Icons.play_arrow),
-        iconSize: 64.0,
-        onPressed: AudioService.play,
-      );
-
-  IconButton pauseButton() => IconButton(
-        icon: Icon(Icons.pause),
-        iconSize: 64.0,
-        onPressed: AudioService.pause,
-      );
-
-  IconButton stopButton() => IconButton(
-        icon: Icon(Icons.stop),
-        iconSize: 64.0,
-        onPressed: AudioService.stop,
-      );
-}
-
-void _backgroundAudioPlayerTask() async {
-  CustomAudioPlayer player = CustomAudioPlayer();
-  AudioServiceBackground.run(
-    onStart: player.run,
-    onPlay: player.play,
-    onPause: player.pause,
-    onStop: player.stop,
-    onClick: (MediaButton button) => player.playPause(),
-  );
-}
-
-class CustomAudioPlayer {
-  String streamUri = 'https://api.itooi.cn/music/netease/url?id=1359356908&key=579621905';
-  AudioPlayer _audioPlayer = new AudioPlayer();
-  Completer _completer = Completer();
-  Map currPlaySong;
-  List myPlaySongsList;
-
-  Future<void> run() async {
-    MediaItem mediaItem =
-        MediaItem(id: 'audio_1', album: 'Sample Album', title: 'Sample Title', artist: 'Sample Artist');
-
-    AudioServiceBackground.setMediaItem(mediaItem);
-
-    var playerStateSubscription =
-        _audioPlayer.onPlayerStateChanged.where((state) => state == AudioPlayerState.COMPLETED).listen((state) {
-      stop();
-      get();
-    });
-
-    play();
-    await _completer.future;
-    playerStateSubscription.cancel();
-  }
-
-  get() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String myPlaySongsListStr = preferences.getString('myPlaySongsList');
-    print(myPlaySongsListStr);
-    if (myPlaySongsListStr == null) {
-    } else {
-      myPlaySongsList = jsonDecode(myPlaySongsListStr);
-      for (var o in myPlaySongsList) {
-        if (o['id'] == currPlaySong['id']) {
-          if (myPlaySongsList.indexOf(o) == myPlaySongsList.length - 1) {
-            currPlaySong = myPlaySongsList[0];
-          } else {
-            currPlaySong = myPlaySongsList[myPlaySongsList.indexOf(o) + 1];
-          }
-        }
-      }
-      await preferences.setString('currPlaySong', jsonEncode(currPlaySong));
-//      AudioService.start(
-//        backgroundTask: _backgroundAudioPlayerTask,
-//        resumeOnClick: true,
-//        androidNotificationChannelName: 'Audio Service Demo',
-//        notificationColor: 0xFF2196f3,
-//        androidNotificationIcon: 'mipmap/ic_launcher',
-//      );
-      print('print');
-      play();
-    }
-  }
-
-  void playPause() {
-    if (AudioServiceBackground.state.basicState == BasicPlaybackState.playing)
-      pause();
-    else
-      play();
-  }
-
-  void play() async {
-    // 获取当前播放的歌曲
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String currPlaySongStr = preferences.getString('currPlaySong');
-    if (currPlaySongStr != null) {
-      currPlaySong = jsonDecode(currPlaySongStr);
-      _audioPlayer.play(currPlaySong['url']);
-      AudioServiceBackground.setState(
-        controls: [pauseControl, stopControl],
-        basicState: BasicPlaybackState.playing,
-      );
-    }
-  }
-
-  void pause() {
-    _audioPlayer.pause();
-    AudioServiceBackground.setState(
-      controls: [playControl, stopControl],
-      basicState: BasicPlaybackState.paused,
-    );
-  }
-
-  void stop() {
-    _audioPlayer.stop();
-    AudioServiceBackground.setState(
-      controls: [],
-      basicState: BasicPlaybackState.stopped,
-    );
-    _completer.complete();
+        height: 40,
+        decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 1))),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              height: 40,
+              padding: EdgeInsets.only(left: 5),
+              child: widget.currPlaySong == null
+                  ? Placeholder(
+                      fallbackHeight: 1,
+                      color: Colors.transparent,
+                    )
+                  : Center(
+                      child: Image.network(
+                        widget.currPlaySong['pic'],
+                        width: 30,
+                        height: 30,
+                      ),
+                    ),
+            ),
+//            StreamBuilder<int>(
+//                stream: bloc.stream,
+//                initialData: bloc.value,
+//                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+//                  return Text(
+//                    '${snapshot.data} / ',
+//                  );
+//                }),
+//            StreamBuilder<String>(
+//                stream: bloc.strVal,
+//                initialData: bloc.str,
+//                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+//                  return Text(
+//                    '${snapshot.data}',
+//                  );
+//                }),
+            Container(
+              width: 40,
+              child: Center(
+                child: InkWell(
+                  onTap: () => isPlaying ? pause() : play(),
+                  child: isPlaying
+                      ? Icon(
+                          Icons.pause,
+                          color: Color(0xFF31C27C),
+                        )
+                      : Icon(
+                          Icons.play_arrow,
+                          color: Color(0xFF31C27C),
+                        ),
+                ),
+              ),
+            ),
+//                      IconButton(
+//                          onPressed: _isPlaying || _isPaused ? () => _stop() : null,
+//                          iconSize: 30,
+//                          icon: new Icon(Icons.stop),
+//                          color: Colors.cyan),
+            Expanded(
+              child: Container(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.only(left: 14),
+                            child: Text(
+                              '${widget.currPlaySong == null ? '' : widget.currPlaySong['name']}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 115,
+                          padding: EdgeInsets.only(right: 14),
+                          child: Text(
+                            position != null
+                                ? '${positionText.substring(2) ?? ''} / ${durationText != null ? durationText.length == 8 ? durationText.substring(3) : durationText.substring(2) : ''}'
+                                : duration != null ? durationText : '',
+                            style: TextStyle(fontSize: 12),
+                            textAlign: TextAlign.right,
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(
+                      height: 20,
+                      child: Slider(
+                        value: slider > 0 ? slider : 0.0,
+                        max: maxSlider > 0 ? maxSlider : 100.0,
+                        min: 0.0,
+                        activeColor: Color(0xFF31C27C),
+                        onChanged: (double val) {
+                          _seek(val);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              width: 40,
+              child: Center(
+                child: InkWell(
+                    child: Icon(
+                      Icons.equalizer,
+                      color: Color(0xFF31C27C),
+                    ),
+                    onTap: () {
+                      Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                        return PlayList(
+                            widget.myPlaySongsList, widget.getSongUrl, widget.changePlayList, widget.currPlaySong);
+                      }));
+                    }),
+              ),
+            ),
+          ],
+        ));
   }
 }

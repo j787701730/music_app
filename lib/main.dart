@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'splashPage.dart';
+//import 'splashPage.dart';
+import 'music/home.dart';
 import 'rxdart/blocProvider.dart';
 
 void main() => runApp(MyApp());
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
         title: 'music App',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(primarySwatch: Colors.blue, platform: TargetPlatform.iOS),
-        home: SplashPage(),
+        home: MusicHome(),
       ),
     );
   }

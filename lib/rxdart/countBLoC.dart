@@ -35,9 +35,34 @@ class CountBLoC {
     _subjectState.add(val);
   }
 
+  String _blocCurrPlaySong;
+  var _subjectCurrPlaySong = BehaviorSubject<String>();
+
+  Stream<String> get blocCurrPlaySong => _subjectCurrPlaySong.stream;
+
+  String get blocCurrPlaySongVal => _blocCurrPlaySong;
+
+  void changeBlocCurrPlaySong(val) {
+    _subjectCurrPlaySong.add(val);
+  }
+
+
+  String _blocMyPlaySongsList;
+  var _subjectMyPlaySongsList = BehaviorSubject<String>();
+
+  Stream<String> get blocMyPlaySongsList => _subjectMyPlaySongsList.stream;
+
+  String get blocMyPlaySongsListVal => _blocMyPlaySongsList;
+
+  void changeBlocMyPlaySongsList(val) {
+    _subjectMyPlaySongsList.add(val);
+  }
+
   void dispose() {
     _subject.close();
     _subject2.close();
     _subjectState.close();
+    _subjectCurrPlaySong.close();
+    _subjectMyPlaySongsList.close();
   }
 }
