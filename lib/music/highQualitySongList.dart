@@ -10,8 +10,9 @@ class HighQualitySongList extends StatefulWidget {
   final getSongUrl;
   final changeFavourite;
   final myFavouriteSongs;
+  final myFavouriteSongsList;
 
-  HighQualitySongList(this.getSongUrl, this.changeFavourite, this.myFavouriteSongs);
+  HighQualitySongList(this.getSongUrl, this.changeFavourite, this.myFavouriteSongs,this.myFavouriteSongsList);
 
   @override
   _HighQualitySongListState createState() => _HighQualitySongListState();
@@ -77,7 +78,7 @@ class _HighQualitySongListState extends State<HighQualitySongList> with Automati
                               return new SongList({
                                 'id': '${item['id']}',
                                 'title': '${item['title']}',
-                              }, widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs);
+                              }, widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs,widget.myFavouriteSongsList);
                             }));
                           },
                           child: Stack(

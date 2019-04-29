@@ -12,8 +12,9 @@ class Discover extends StatefulWidget {
   final getSongUrl;
   final changeFavourite;
   final myFavouriteSongs;
+  final myFavouriteSongsList;
 
-  Discover(this.getSongUrl, this.changeFavourite, this.myFavouriteSongs);
+  Discover(this.getSongUrl, this.changeFavourite, this.myFavouriteSongs, this.myFavouriteSongsList);
 
   @override
   _DiscoverState createState() => _DiscoverState();
@@ -133,8 +134,8 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                           ),
                           onTap: () {
                             Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
-                              return new HotSongList(
-                                  widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs);
+                              return new HotSongList(widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs,
+                                  widget.myFavouriteSongsList);
                             }));
                           },
                         ),
@@ -157,7 +158,8 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                               return new SongList({
                                 'id': '${item['id']}',
                                 'title': '${item['title']}',
-                              }, widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs);
+                              }, widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs,
+                                  widget.myFavouriteSongsList);
                             }));
                           },
                           child: Stack(
@@ -234,8 +236,8 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                           ),
                           onTap: () {
                             Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
-                              return new HighQualitySongList(
-                                  widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs);
+                              return new HighQualitySongList(widget.getSongUrl, widget.changeFavourite,
+                                  widget.myFavouriteSongs, widget.myFavouriteSongsList);
                             }));
                           },
                         ),
@@ -258,10 +260,13 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                         child: InkWell(
                           onTap: () {
                             Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                              print('发现页');
+                              print(item);
                               return new SongList({
                                 'id': '${item['id']}',
                                 'title': '${item['title']}',
-                              }, widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs);
+                              }, widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs,
+                                  widget.myFavouriteSongsList);
                             }));
                           },
                           child: Stack(

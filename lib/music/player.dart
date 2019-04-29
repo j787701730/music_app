@@ -3,6 +3,7 @@ import 'package:audioplayer/audioplayer.dart';
 import 'dart:async';
 import '../rxdart/blocProvider.dart';
 import 'playList.dart';
+import 'lrc.dart';
 
 enum PlayerState { stopped, playing, paused }
 
@@ -58,7 +59,7 @@ class _PlayerState extends State<Player> {
   _initxx() {
     final bloc = BlocProvider.of(context);
     bloc.state.listen((str) {
-      print(str);
+//      print(str);
 //      if(str == 10){
 //        _pause();
 //      }
@@ -79,7 +80,6 @@ class _PlayerState extends State<Player> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.playUrl != widget.playUrl) {
       if (!mounted) return;
-      print(widget.playUrl);
       stop();
       if (widget.autoPlayBool) {
         setState(() {
@@ -144,10 +144,8 @@ class _PlayerState extends State<Player> {
         setState(() {
           position = duration;
         });
-        print('AudioPlayerState.STOPPED');
       } else if (s == AudioPlayerState.COMPLETED) {
         onComplete();
-        print('COMPLETED');
         _playNext();
       }
     }, onError: (msg) {
@@ -216,12 +214,19 @@ class _PlayerState extends State<Player> {
                       fallbackHeight: 1,
                       color: Colors.transparent,
                     )
-                  : Center(
-                      child: Image.network(
-                        widget.currPlaySong['pic'],
-                        width: 30,
-                        height: 30,
+                  : InkWell(
+                      child: Center(
+                        child: Image.network(
+                          widget.currPlaySong['pic'],
+                          width: 30,
+                          height: 30,
+                        ),
                       ),
+                      onTap: () {
+                        Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                          return Lrc({'currPlaySong': widget.currPlaySong});
+                        }));
+                      },
                     ),
             ),
 //            StreamBuilder<int>(

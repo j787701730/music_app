@@ -58,11 +58,24 @@ class CountBLoC {
     _subjectMyPlaySongsList.add(val);
   }
 
+
+  String _blocMyFavouriteSongs;
+  var _subjectMyFavouriteSongs = BehaviorSubject<String>();
+
+  Stream<String> get blocMyFavouriteSongs => _subjectMyFavouriteSongs.stream;
+
+  String get blocMyFavouriteSongsVal => _blocMyFavouriteSongs;
+
+  void changeBlocMyFavouriteSongs(val) {
+    _subjectMyFavouriteSongs.add(val);
+  }
+
   void dispose() {
     _subject.close();
     _subject2.close();
     _subjectState.close();
     _subjectCurrPlaySong.close();
     _subjectMyPlaySongsList.close();
+    _subjectMyFavouriteSongs.close();
   }
 }

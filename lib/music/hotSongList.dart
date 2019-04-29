@@ -8,8 +8,9 @@ class HotSongList extends StatefulWidget {
   final getSongUrl;
   final changeFavourite;
   final myFavouriteSongs;
+  final myFavouriteSongsList;
 
-  HotSongList(this.getSongUrl, this.changeFavourite, this.myFavouriteSongs);
+  HotSongList(this.getSongUrl, this.changeFavourite, this.myFavouriteSongs,this.myFavouriteSongsList);
 
   @override
   _HotSongListState createState() => _HotSongListState();
@@ -75,7 +76,7 @@ class _HotSongListState extends State<HotSongList> with AutomaticKeepAliveClient
                               return new SongList({
                                 'id': '${item['id']}',
                                 'title': '${item['title']}',
-                              }, widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs);
+                              }, widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs,widget.myFavouriteSongsList);
                             }));
                           },
                           child: Stack(

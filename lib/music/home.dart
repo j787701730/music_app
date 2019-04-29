@@ -20,6 +20,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
   String playUrl;
   Map currPlaySong;
   List myFavouriteSongs;
+  List myFavouriteSongsList;
   List myPlaySongsList;
   bool autoPlayBool = false;
 
@@ -28,6 +29,7 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
     super.initState();
     _tabController = new TabController(vsync: this, initialIndex: 1, length: categoryList.length);
     getFavoriteSongs();
+    getFavoriteSongsList();
     getMyPlaySongsList();
     getCurrPlaySong();
   }
@@ -87,33 +89,75 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
     }
   }
 
+  getFavoriteSongsList() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String myFavouriteSongsStr = preferences.getString('myFavouriteSongsList');
+    if (myFavouriteSongsStr == null) {
+      setState(() {
+        myFavouriteSongsList = [];
+      });
+    } else {
+      setState(() {
+        myFavouriteSongsList = jsonDecode(myFavouriteSongsStr);
+      });
+    }
+  }
+
   // 添加或删除 我的收藏
   /// list 数据  flag true=>添加 false=>删除,
-  changeFavourite(Map list, bool flag) async {
+  changeFavourite(Map list, bool flag, {type = 'single'}) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String myFavouriteSongsStr = preferences.getString('myFavouriteSongs');
-    List arr = [];
-    if (myFavouriteSongsStr == null) {
-      if (flag) {
-        arr.add(list);
-      }
-    } else {
-      arr = jsonDecode(myFavouriteSongsStr);
-      if (flag) {
-        arr.insert(0, list);
+    if (type == 'single') {
+      String myFavouriteSongsStr = preferences.getString('myFavouriteSongs');
+      List arr = [];
+      if (myFavouriteSongsStr == null) {
+        if (flag) {
+          arr.add(list);
+        }
       } else {
-        for (var o in arr) {
-          if (o['id'] == list['id']) {
-            arr.remove(o);
-            break;
+        arr = jsonDecode(myFavouriteSongsStr);
+        if (flag) {
+          arr.insert(0, list);
+        } else {
+          for (var o in arr) {
+            if (o['id'] == list['id']) {
+              arr.remove(o);
+              break;
+            }
           }
         }
       }
+      setState(() {
+        myFavouriteSongs = arr;
+      });
+      preferences.setString('myFavouriteSongs', jsonEncode(arr));
+      final bloc = BlocProvider.of(context);
+      bloc.changeBlocMyFavouriteSongs(jsonEncode(arr));
+    } else {
+      String myFavouriteSongsListStr = preferences.getString('myFavouriteSongsList');
+      List arr = [];
+      if (myFavouriteSongsListStr == null) {
+        if (flag) {
+          arr.add(list);
+        }
+      } else {
+        arr = jsonDecode(myFavouriteSongsListStr);
+        if (flag) {
+          arr.insert(0, list);
+        } else {
+          for (var o in arr) {
+            if (o['id'] == list['id']) {
+              arr.remove(o);
+              break;
+            }
+          }
+        }
+      }
+      setState(() {
+        myFavouriteSongsList = arr;
+      });
+      preferences.setString('myFavouriteSongsList', jsonEncode(arr));
     }
-    setState(() {
-      myFavouriteSongs = arr;
-    });
-    preferences.setString('myFavouriteSongs', jsonEncode(arr));
   }
 
   getMyPlaySongsList() async {
@@ -222,8 +266,8 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
                 Container(
                   height: MediaQuery.of(context).size.height - 40 - 56 - MediaQuery.of(context).padding.top,
                   child: TabBarView(controller: _tabController, children: <Widget>[
-                    MyFavourite(getSongUrl, changeFavourite, myFavouriteSongs),
-                    Discover(getSongUrl, changeFavourite, myFavouriteSongs),
+                    MyFavourite(getSongUrl, changeFavourite, myFavouriteSongs, myFavouriteSongsList),
+                    Discover(getSongUrl, changeFavourite, myFavouriteSongs, myFavouriteSongsList),
                   ]),
                 ),
                 Container(

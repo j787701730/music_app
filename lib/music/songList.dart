@@ -4,38 +4,69 @@ import 'dart:convert';
 import '../pageLoading.dart';
 import '../utils/common.dart';
 import 'dart:ui';
+import '../rxdart/blocProvider.dart';
 
 class SongList extends StatefulWidget {
   final props;
   final getSongUrl;
   final changeFavourite;
   final myFavouriteSongs;
+  final myFavouriteSongsList;
 
-  SongList(this.props, this.getSongUrl, this.changeFavourite, this.myFavouriteSongs);
+  SongList(this.props, this.getSongUrl, this.changeFavourite, this.myFavouriteSongs, this.myFavouriteSongsList);
 
   @override
   _SongListState createState() => _SongListState();
 }
 
 class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin {
+  List myFavouriteSongs = [];
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    myFavouriteSongs = widget.myFavouriteSongs;
     _songList();
+  }
+
+  _init() {
+    final bloc = BlocProvider.of(context);
+    bloc.blocMyFavouriteSongs.listen((str) {
+      if (str != null) {
+        List lis = jsonDecode(str);
+        if (myFavouriteSongs.length != lis.length) {
+          setState(() {
+            myFavouriteSongs = lis;
+          });
+        }
+      }
+    });
   }
 
   @override
   bool get wantKeepAlive => true;
   Map songList = {};
+  bool favouriteFlag = false;
 
   _songList() {
     ajax('/songList?key=579621905&id=${widget.props['id']}', (data) {
       if (!mounted) return;
       if (data['code'] == 200) {
+        if (widget.myFavouriteSongsList.isNotEmpty) {
+          for (var o in widget.myFavouriteSongsList) {
+            if (o['songListId'] == widget.props['id']) {
+              setState(() {
+                favouriteFlag = true;
+              });
+              break;
+            }
+          }
+        }
         setState(() {
           songList = data['data'];
         });
+        _init();
       }
     });
   }
@@ -187,7 +218,18 @@ class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin 
                           ),
                           Container(
                             width: 100,
-                            child: FlatButton(onPressed: () {}, child: Text('收藏')),
+                            child: FlatButton(
+                              onPressed: () {
+                                Map list = jsonDecode(jsonEncode(songList));
+                                list.remove('songs');
+                                widget.changeFavourite(list, !favouriteFlag, type: 'list');
+                                setState(() {
+                                  favouriteFlag = !favouriteFlag;
+                                });
+                              },
+                              child: Text('收藏'),
+                              color: favouriteFlag ? Colors.red : Colors.white,
+                            ),
                           )
                         ],
                       ),
@@ -196,10 +238,24 @@ class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin 
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: songList['songs'].map<Widget>((song) {
+                        bool flag = false;
+                        if (myFavouriteSongs.isNotEmpty) {
+                          for (var o in myFavouriteSongs) {
+                            if (o['id'] == song['id']) {
+                              flag = true;
+                              break;
+                            }
+                          }
+                        }
                         return ListTile(
                           leading: Text('${songList['songs'].indexOf(song) + 1}'),
                           title: Text(song['name']),
                           subtitle: Text(song['singer']),
+                          trailing: IconButton(
+                              icon: flag ? Icon(Icons.remove) : Icon(Icons.add),
+                              onPressed: () {
+                                widget.changeFavourite(song, !flag, type: 'single');
+                              }),
                           onTap: () {
                             widget.getSongUrl([song]);
                           },
