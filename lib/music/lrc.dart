@@ -15,20 +15,20 @@ class Lrc extends StatefulWidget {
 
 class _LrcState extends State<Lrc> {
   Map currSong;
-  ScrollController _scrollController;
+//  ScrollController _scrollController;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _scrollController = new ScrollController();
+//    _scrollController = new ScrollController();
     currSong = widget.props['currPlaySong'];
     _lrc();
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+//    _scrollController.dispose();
     super.dispose();
   }
 
@@ -49,13 +49,14 @@ class _LrcState extends State<Lrc> {
   }
 
   _lrc() async {
-    _scrollController.animateTo(0, duration: Duration(milliseconds: 500), curve: Curves.ease);
+//    _scrollController.animateTo(0, duration: Duration(milliseconds: 500), curve: Curves.ease);
     try {
       Response response;
       response = await Dio().get("${currSong['lrc']}", options: new Options(responseType: ResponseType.plain));
       if (!mounted) return;
       if (response.data != null) {
         var lrc = response.data;
+        print(lrc);
         setState(() {
           lrcData = getLyricMap(lrc);
         });
@@ -130,7 +131,7 @@ class _LrcState extends State<Lrc> {
               height: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - 56,
               child: Container(
                 child: ListView(
-                  controller: _scrollController,
+//                  controller: _scrollController,
                   padding: EdgeInsets.only(top: 20, bottom: 20, left: 10, right: 10),
                   children: <Widget>[
                     lrcData != null

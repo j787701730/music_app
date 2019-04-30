@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/utils/util.dart';
-import 'dart:convert';
+
+//import 'dart:convert';
 import '../pageLoading.dart';
 import '../utils/common.dart';
 import 'songList.dart';
@@ -8,6 +9,7 @@ import 'mv.dart';
 import 'hotSongList.dart';
 import 'highQualitySongList.dart';
 import 'songListCategory.dart';
+import 'toplist.dart';
 
 class Discover extends StatefulWidget {
   final getSongUrl;
@@ -88,6 +90,7 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
         padding: EdgeInsets.only(bottom: 10),
         children: <Widget>[
           Container(
+            padding: EdgeInsets.only(top: 10, bottom: 10),
             decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFF31C27C), width: 1))),
             child: Wrap(
               children: <Widget>[
@@ -99,10 +102,26 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                         children: <Widget>[Icon(Icons.queue_music), Text('歌单')],
                       ),
                     ),
-                    onTap: (){
+                    onTap: () {
                       Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
                         return new SongListCategory(widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs,
-                          widget.myFavouriteSongsList);
+                            widget.myFavouriteSongsList);
+                      }));
+                    },
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 4,
+                  child: InkWell(
+                    child: Center(
+                      child: Column(
+                        children: <Widget>[Icon(Icons.queue_music), Text('排行榜')],
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                        return new TopList(widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs,
+                            widget.myFavouriteSongsList);
                       }));
                     },
                   ),
