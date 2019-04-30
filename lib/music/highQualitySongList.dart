@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/utils/util.dart';
 import '../pageLoading.dart';
-import '../utils/common.dart';
+//import '../utils/common.dart';
 import 'songList.dart';
-import 'mv.dart';
-import 'hotSongList.dart';
+//import 'mv.dart';
+//import 'hotSongList.dart';
 
 class HighQualitySongList extends StatefulWidget {
   final getSongUrl;

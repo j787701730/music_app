@@ -7,6 +7,7 @@ import 'songList.dart';
 import 'mv.dart';
 import 'hotSongList.dart';
 import 'highQualitySongList.dart';
+import 'songListCategory.dart';
 
 class Discover extends StatefulWidget {
   final getSongUrl;
@@ -86,25 +87,29 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
       body: ListView(
         padding: EdgeInsets.only(bottom: 10),
         children: <Widget>[
-//          Container(
-//            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFF31C27C), width: 1))),
-//            child: Wrap(
-//              children: songListTop.map<Widget>((item) {
-//                return Container(
-//                  width: MediaQuery.of(context).size.width / 3,
-//                  height: 30,
-//                  child: InkWell(
-//                    onTap: () {
-//                      _chooseTopSong(item['topid']);
-//                    },
-//                    child: Center(
-//                      child: Text(item['name']),
-//                    ),
-//                  ),
-//                );
-//              }).toList(),
-//            ),
-//          ),
+          Container(
+            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFF31C27C), width: 1))),
+            child: Wrap(
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width / 4,
+                  child: InkWell(
+                    child: Center(
+                      child: Column(
+                        children: <Widget>[Icon(Icons.queue_music), Text('歌单')],
+                      ),
+                    ),
+                    onTap: (){
+                      Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                        return new SongListCategory(widget.getSongUrl, widget.changeFavourite, widget.myFavouriteSongs,
+                          widget.myFavouriteSongsList);
+                      }));
+                    },
+                  ),
+                )
+              ],
+            ),
+          ),
           Container(
             height: 10,
           ),
@@ -128,9 +133,14 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                         width: 100,
                         padding: EdgeInsets.only(right: 10),
                         child: InkWell(
-                          child: Text(
-                            '更多热门',
-                            textAlign: TextAlign.right,
+                          child: Container(
+                            height: 30,
+                            child: Center(
+                              child: Text(
+                                '更多热门',
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
                           ),
                           onTap: () {
                             Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
@@ -230,9 +240,14 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                         width: 100,
                         padding: EdgeInsets.only(right: 10),
                         child: InkWell(
-                          child: Text(
-                            '更多精品',
-                            textAlign: TextAlign.right,
+                          child: Container(
+                            height: 30,
+                            child: Center(
+                              child: Text(
+                                '更多精品',
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
                           ),
                           onTap: () {
                             Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
@@ -260,8 +275,6 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                         child: InkWell(
                           onTap: () {
                             Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
-                              print('发现页');
-                              print(item);
                               return new SongList({
                                 'id': '${item['id']}',
                                 'title': '${item['title']}',
