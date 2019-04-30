@@ -10,6 +10,7 @@ import 'hotSongList.dart';
 import 'highQualitySongList.dart';
 import 'songListCategory.dart';
 import 'toplist.dart';
+import '../index.dart';
 
 class Discover extends StatefulWidget {
   final getSongUrl;
@@ -125,12 +126,23 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                       }));
                     },
                   ),
+                ),Container(
+                  width: MediaQuery.of(context).size.width / 4,
+                  child: InkWell(
+                    child: Center(
+                      child: Column(
+                        children: <Widget>[Icon(Icons.more_horiz), Text('整合')],
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                        return new Index();
+                      }));
+                    },
+                  ),
                 )
               ],
             ),
-          ),
-          Container(
-            height: 10,
           ),
           hotSongList.isEmpty
               ? Placeholder(
@@ -149,7 +161,7 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                         ),
                       )),
                       Container(
-                        width: 100,
+                        width: 80,
                         padding: EdgeInsets.only(right: 10),
                         child: InkWell(
                           child: Container(
@@ -203,7 +215,7 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                                     fit: BoxFit.cover,
                                   ),
                                   Container(
-                                    height: 42,
+                                    height: 34,
                                     child: Text(
                                       '${item['title']}',
                                       maxLines: 2,
@@ -256,7 +268,7 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                         ),
                       )),
                       Container(
-                        width: 100,
+                        width: 80,
                         padding: EdgeInsets.only(right: 10),
                         child: InkWell(
                           child: Container(
@@ -313,7 +325,7 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                                     fit: BoxFit.cover,
                                   ),
                                   Container(
-                                    height: 42,
+                                    height: 34,
                                     child: Text(
                                       '${item['title']}',
                                       maxLines: 2,
@@ -347,7 +359,7 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                         ),
                       )),
                       Container(
-                        width: 100,
+                        width: 80,
                         padding: EdgeInsets.only(right: 10),
                         child: InkWell(
                           child: Text(
@@ -395,7 +407,7 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                                     fit: BoxFit.cover,
                                   ),
                                   Container(
-                                    height: 42,
+                                    height: 34,
                                     child: Text(
                                       '${item['name']}',
                                       maxLines: 2,

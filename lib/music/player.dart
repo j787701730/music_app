@@ -15,8 +15,7 @@ class Player extends StatefulWidget {
   final getSongUrl;
   final changePlayList;
 
-  Player(
-      this.playUrl, this.autoPlayBool, this.currPlaySong, this.myPlaySongsList, this.getSongUrl, this.changePlayList);
+  Player(this.playUrl, this.autoPlayBool, this.currPlaySong, this.myPlaySongsList, this.getSongUrl, this.changePlayList);
 
   @override
   _PlayerState createState() => _PlayerState();
@@ -91,7 +90,7 @@ class _PlayerState extends State<Player> {
           _initAudioPlayer();
         });
       }
-      _initxx();
+//      _initxx();
     }
   }
 
@@ -199,36 +198,36 @@ class _PlayerState extends State<Player> {
   @override
   Widget build(BuildContext context) {
 //    final bloc = BlocProvider.of(context);
-    return Container(
-        height: 40,
-        decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 1))),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              height: 40,
-              padding: EdgeInsets.only(left: 5),
-              child: widget.currPlaySong == null
-                  ? Placeholder(
-                      fallbackHeight: 1,
-                      color: Colors.transparent,
-                    )
-                  : InkWell(
-                      child: Center(
-                        child: Image.network(
-                          widget.currPlaySong['pic'],
-                          width: 30,
-                          height: 30,
-                        ),
+    return widget.currPlaySong == null
+        ? Placeholder(
+            fallbackHeight: 1,
+            color: Colors.transparent,
+          )
+        : Container(
+            height: 40,
+            decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey, width: 0.2))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  height: 40,
+                  padding: EdgeInsets.only(left: 5),
+                  child: InkWell(
+                    child: Center(
+                      child: Image.network(
+                        widget.currPlaySong['pic'],
+                        width: 30,
+                        height: 30,
                       ),
-                      onTap: () {
-                        Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
-                          return Lrc({'currPlaySong': widget.currPlaySong});
-                        }));
-                      },
                     ),
-            ),
+                    onTap: () {
+                      Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                        return Lrc({'currPlaySong': widget.currPlaySong});
+                      }));
+                    },
+                  ),
+                ),
 //            StreamBuilder<int>(
 //                stream: bloc.stream,
 //                initialData: bloc.value,
@@ -245,93 +244,92 @@ class _PlayerState extends State<Player> {
 //                    '${snapshot.data}',
 //                  );
 //                }),
-            Container(
-              width: 40,
-              child: Center(
-                child: InkWell(
-                  onTap: () => isPlaying ? pause() : play(),
-                  child: isPlaying
-                      ? Icon(
-                          Icons.pause,
-                          color: Color(0xFF31C27C),
-                        )
-                      : Icon(
-                          Icons.play_arrow,
-                          color: Color(0xFF31C27C),
-                        ),
+                Container(
+                  width: 40,
+                  child: Center(
+                    child: InkWell(
+                      onTap: () => isPlaying ? pause() : play(),
+                      child: isPlaying
+                          ? Icon(
+                              Icons.pause,
+                              color: Color(0xFF31C27C),
+                            )
+                          : Icon(
+                              Icons.play_arrow,
+                              color: Color(0xFF31C27C),
+                            ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
 //                      IconButton(
 //                          onPressed: _isPlaying || _isPaused ? () => _stop() : null,
 //                          iconSize: 30,
 //                          icon: new Icon(Icons.stop),
 //                          color: Colors.cyan),
-            Expanded(
-              child: Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Row(
+                Expanded(
+                  child: Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.only(left: 14),
-                            child: Text(
-                              '${widget.currPlaySong == null ? '' : widget.currPlaySong['name']}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 12),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.only(left: 14),
+                                child: Text(
+                                  '${widget.currPlaySong == null ? '' : widget.currPlaySong['name']}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ),
                             ),
-                          ),
+                            Container(
+                              width: 115,
+                              padding: EdgeInsets.only(right: 14),
+                              child: Text(
+                                position != null
+                                    ? '${positionText.substring(2) ?? ''} / ${durationText != null ? durationText.length == 8 ? durationText.substring(3) : durationText.substring(2) : ''}'
+                                    : duration != null ? durationText : '',
+                                style: TextStyle(fontSize: 12),
+                                textAlign: TextAlign.right,
+                              ),
+                            )
+                          ],
                         ),
                         Container(
-                          width: 115,
-                          padding: EdgeInsets.only(right: 14),
-                          child: Text(
-                            position != null
-                                ? '${positionText.substring(2) ?? ''} / ${durationText != null ? durationText.length == 8 ? durationText.substring(3) : durationText.substring(2) : ''}'
-                                : duration != null ? durationText : '',
-                            style: TextStyle(fontSize: 12),
-                            textAlign: TextAlign.right,
+                          height: 20,
+                          child: Slider(
+                            value: slider > 0 ? slider : 0.0,
+                            max: maxSlider > 0 ? maxSlider : 100.0,
+                            min: 0.0,
+                            activeColor: Color(0xFF31C27C),
+                            onChanged: (double val) {
+                              _seek(val);
+                            },
                           ),
-                        )
+                        ),
                       ],
                     ),
-                    Container(
-                      height: 20,
-                      child: Slider(
-                        value: slider > 0 ? slider : 0.0,
-                        max: maxSlider > 0 ? maxSlider : 100.0,
-                        min: 0.0,
-                        activeColor: Color(0xFF31C27C),
-                        onChanged: (double val) {
-                          _seek(val);
-                        },
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            Container(
-              width: 40,
-              child: Center(
-                child: InkWell(
-                    child: Icon(
-                      Icons.playlist_play,
-                      color: Color(0xFF31C27C),
-                    ),
-                    onTap: () {
-                      Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
-                        return PlayList(
-                            widget.myPlaySongsList, widget.getSongUrl, widget.changePlayList, widget.currPlaySong);
-                      }));
-                    }),
-              ),
-            ),
-          ],
-        ));
+                Container(
+                  width: 40,
+                  child: Center(
+                    child: InkWell(
+                        child: Icon(
+                          Icons.playlist_play,
+                          color: Color(0xFF31C27C),
+                        ),
+                        onTap: () {
+                          Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
+                            return PlayList(widget.myPlaySongsList, widget.getSongUrl, widget.changePlayList, widget.currPlaySong);
+                          }));
+                        }),
+                  ),
+                ),
+              ],
+            ));
   }
 }
