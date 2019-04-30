@@ -203,21 +203,22 @@ class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin 
                     Container(
                       child: Row(
                         children: <Widget>[
-                          Expanded(
-                            child: Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: InkWell(
-                                onTap: () {
-                                  widget.getSongUrl(songList['songs']);
-                                },
-                                child: Row(
-                                  children: <Widget>[Icon(Icons.play_circle_outline), Text('播放全部')],
-                                ),
+                          Container(
+                            margin: EdgeInsets.only(left: 10),
+                            child: FlatButton(
+                              onPressed: () {
+                                widget.getSongUrl(songList['songs']);
+                              },
+                              child: Row(
+                                children: <Widget>[Icon(Icons.play_circle_outline), Text(' 播放全部')],
                               ),
                             ),
                           ),
+                          Expanded(
+                            child: Text(''),
+                          ),
                           Container(
-                            width: 100,
+                            padding: EdgeInsets.only(right: 10),
                             child: FlatButton(
                               onPressed: () {
                                 Map list = jsonDecode(jsonEncode(songList));

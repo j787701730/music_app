@@ -115,7 +115,7 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                   child: InkWell(
                     child: Center(
                       child: Column(
-                        children: <Widget>[Icon(Icons.queue_music), Text('排行榜')],
+                        children: <Widget>[Icon(Icons.equalizer), Text('排行榜')],
                       ),
                     ),
                     onTap: () {

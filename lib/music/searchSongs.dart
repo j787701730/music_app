@@ -78,6 +78,7 @@ class _SearchSongsState extends State<SearchSongs> with AutomaticKeepAliveClient
     ajax('/search?key=579621905&s=$searchWord&type=${type[tabIndex]['type']}&limit=50&offset=0', (data) {
       if (!mounted) return;
       if (data['code'] == 200) {
+        print(data['data']);
         switch (tabIndex) {
           case 0:
             setState(() {
@@ -149,13 +150,13 @@ class _SearchSongsState extends State<SearchSongs> with AutomaticKeepAliveClient
           controller: _tabController,
           children: <Widget>[
             SearchSongPage({'data': songTypeData}, widget.getSongUrl),
-            new Center(child: new Text('船')),
-            new Center(child: new Text('巴士')),
-            new Center(child: new Text('自行车')),
-            new Center(child: new Text('船')),
-            new Center(child: new Text('巴士')),
-            new Center(child: new Text('自行车')),
-            new Center(child: new Text('船')),
+            new Center(child: new Text('歌手')),
+            new Center(child: new Text('专辑')),
+            new Center(child: new Text('歌单')),
+            new Center(child: new Text('视频')),
+            new Center(child: new Text('电台')),
+            new Center(child: new Text('用户')),
+            new Center(child: new Text('歌词')),
           ],
         ),
       ),

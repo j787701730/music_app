@@ -56,7 +56,6 @@ class _LrcState extends State<Lrc> {
       if (!mounted) return;
       if (response.data != null) {
         var lrc = response.data;
-        print(lrc);
         setState(() {
           lrcData = getLyricMap(lrc);
         });

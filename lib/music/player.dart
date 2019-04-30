@@ -320,7 +320,7 @@ class _PlayerState extends State<Player> {
               child: Center(
                 child: InkWell(
                     child: Icon(
-                      Icons.equalizer,
+                      Icons.playlist_play,
                       color: Color(0xFF31C27C),
                     ),
                     onTap: () {
