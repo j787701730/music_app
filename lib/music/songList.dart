@@ -249,7 +249,13 @@ class _SongListState extends State<SongList> with AutomaticKeepAliveClientMixin 
                           }
                         }
                         return ListTile(
-                          leading: Text('${songList['songs'].indexOf(song) + 1}'),
+                          contentPadding: EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 0),
+                          leading: Container(
+                            width: 34,
+                            child: Center(
+                              child: Text('${songList['songs'].indexOf(song) + 1}'),
+                            ),
+                          ),
                           title: Text(song['name']),
                           subtitle: Text(song['singer']),
                           trailing: IconButton(

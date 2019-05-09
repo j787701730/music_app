@@ -93,12 +93,12 @@ class _HighQualitySongListState extends State<HighQualitySongList> with Automati
                                     fit: BoxFit.cover,
                                   ),
                                   Container(
-                                    height: 42,
+                                    height: 30,
                                     child: Text(
                                       '${item['title']}',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 14),
+                                      style: TextStyle(fontSize: 12),
                                     ),
                                   )
                                 ],

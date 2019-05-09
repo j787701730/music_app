@@ -236,10 +236,10 @@ class _MusicHomeState extends State<MusicHome> with SingleTickerProviderStateMix
       appBar: AppBar(
         centerTitle: true,
         title: TabBar(
-          labelPadding: EdgeInsets.only(
-            left: 12,
-            right: 12,
-          ),
+//          labelPadding: EdgeInsets.only(
+//            left: 12,
+//            right: 12,
+//          ),
           isScrollable: true,
           tabs: categoryList.map<Widget>((item) {
             return (Tab(child: Text(item['name'])));

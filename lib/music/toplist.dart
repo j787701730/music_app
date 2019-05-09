@@ -165,14 +165,14 @@ class _TopListState extends State<TopList> with AutomaticKeepAliveClientMixin {
         title: Text('排行榜'),
       ),
       body: ListView(
-        padding: EdgeInsets.only(left: 10, right: 10),
+        padding: EdgeInsets.only(left: 10, right: 10,bottom: 10),
         children: topList.map<Widget>((item) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
-                padding: EdgeInsets.only(top: 10, bottom: 6),
+                padding: EdgeInsets.only(top: 6, bottom: 6),
                 child: Text(
                   item['name'],
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -181,7 +181,6 @@ class _TopListState extends State<TopList> with AutomaticKeepAliveClientMixin {
               Column(
                 children: item['items'].map<Widget>((el) {
                   return Container(
-                    margin: EdgeInsets.only(bottom: 10),
                     child: InkWell(
                       child: Container(
                         padding: EdgeInsets.only(top: 5,bottom: 5,left: 5),
@@ -193,7 +192,7 @@ class _TopListState extends State<TopList> with AutomaticKeepAliveClientMixin {
                               height: 40,
                             ),
                             Container(
-                              padding: EdgeInsets.only(left: 10),
+                              padding: EdgeInsets.only(left: 6),
                               child: Text(el['name']),
                             )
                           ],

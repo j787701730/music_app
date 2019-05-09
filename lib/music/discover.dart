@@ -91,16 +91,19 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
         padding: EdgeInsets.only(bottom: 10),
         children: <Widget>[
           Container(
-            padding: EdgeInsets.only(top: 10, bottom: 10),
+            padding: EdgeInsets.only(top: 5, bottom: 5),
             decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFF31C27C), width: 1))),
             child: Wrap(
               children: <Widget>[
                 Container(
                   width: MediaQuery.of(context).size.width / 4,
                   child: InkWell(
-                    child: Center(
-                      child: Column(
-                        children: <Widget>[Icon(Icons.queue_music), Text('歌单')],
+                    child: Container(
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[Icon(Icons.queue_music, color: Color(0xFF31C27C)), Text('歌单')],
+                        ),
                       ),
                     ),
                     onTap: () {
@@ -114,9 +117,12 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                 Container(
                   width: MediaQuery.of(context).size.width / 4,
                   child: InkWell(
-                    child: Center(
-                      child: Column(
-                        children: <Widget>[Icon(Icons.equalizer), Text('排行榜')],
+                    child: Container(
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[Icon(Icons.equalizer, color: Color(0xFF31C27C)), Text('排行榜')],
+                        ),
                       ),
                     ),
                     onTap: () {
@@ -126,12 +132,16 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                       }));
                     },
                   ),
-                ),Container(
+                ),
+                Container(
                   width: MediaQuery.of(context).size.width / 4,
                   child: InkWell(
-                    child: Center(
-                      child: Column(
-                        children: <Widget>[Icon(Icons.more_horiz), Text('整合')],
+                    child: Container(
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      child: Center(
+                        child: Column(
+                          children: <Widget>[Icon(Icons.more_horiz, color: Color(0xFF31C27C)), Text('整合')],
+                        ),
                       ),
                     ),
                     onTap: () {
@@ -215,12 +225,12 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                                     fit: BoxFit.cover,
                                   ),
                                   Container(
-                                    height: 34,
+                                    height: 30,
                                     child: Text(
                                       '${item['title']}',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 14),
+                                      style: TextStyle(fontSize: 12),
                                     ),
                                   )
                                 ],
@@ -325,12 +335,12 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                                     fit: BoxFit.cover,
                                   ),
                                   Container(
-                                    height: 34,
+                                    height: 30,
                                     child: Text(
                                       '${item['title']}',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 14),
+                                      style: TextStyle(fontSize: 12),
                                     ),
                                   )
                                 ],
@@ -407,12 +417,12 @@ class _DiscoverState extends State<Discover> with AutomaticKeepAliveClientMixin 
                                     fit: BoxFit.cover,
                                   ),
                                   Container(
-                                    height: 34,
+                                    height: 30,
                                     child: Text(
                                       '${item['name']}',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 14),
+                                      style: TextStyle(fontSize: 12),
                                     ),
                                   )
                                 ],

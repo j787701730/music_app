@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../rxdart/blocProvider.dart';
 import 'dart:convert';
 import 'dart:ui';
+import '../pageLoading.dart';
 
 class Lrc extends StatefulWidget {
   final props;
@@ -15,6 +16,7 @@ class Lrc extends StatefulWidget {
 
 class _LrcState extends State<Lrc> {
   Map currSong;
+
 //  ScrollController _scrollController;
 
   @override
@@ -114,13 +116,13 @@ class _LrcState extends State<Lrc> {
               ),
             ),
             new Container(
-                child: new BackdropFilter(
+                child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
               child: Opacity(
                 opacity: 0.5,
-                child: new Container(
-                  decoration: new BoxDecoration(
-                    color: Colors.transparent,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black12.withOpacity(0.3),
                   ),
                 ),
               ),
@@ -154,7 +156,7 @@ class _LrcState extends State<Lrc> {
                           )
                         : Container(
                             child: Center(
-                              child: Text('无歌词'),
+                              child: PageLoading(),
                             ),
                           )
                   ],
